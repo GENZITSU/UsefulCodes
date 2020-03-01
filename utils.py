@@ -16,6 +16,7 @@ def start_logging(filename="job.log"):
     LOGGER.addHandler(fh)
     formatter = logging.Formatter('%(asctime)s:%(lineno)d:%(levelname)s:%(message)s')
     fh.setFormatter(formatter)
+    LOGGER.info("start logging")
     return LOGGER
 
 
@@ -45,14 +46,15 @@ def do_job(name, LOGGER):
     start = time.time()
     try:
         yield
-        LOGGER.info(f'[{name}] done in {time.time() - start:.0f} s')
-        progress_reporter(f'[{name}] done in {time.time() - start:.0f} s')
+        msg = f'[{name}] done in {time.time() - start:.0f} s'
     except:
         import traceback, sys
         exc_type, exc_value, exc_traceback = sys.exc_info()
         exc_lines = traceback.format_exception(exc_type, exc_value, exc_traceback)
-        msg = f"failed {name} \n"
+        msg = f"failed [{name}] \n"
         msg += ''.join('' + line for line in exc_lines)
+        raise exc_value
+    finally:
         LOGGER.info(msg)
         progress_reporter(msg)
         
